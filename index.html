@@ -5,31 +5,38 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Personalizovaný Běžecký Analyzátor</title>
     
-<style>
+    <style>
         body { font-family: sans-serif; max-width: 900px; margin: 0 auto; padding: 20px; background-color: #121212; color: #ecf0f1; } /* Tmavé pozadí */
         h1, h2, h3 { color: #f2f2f2; border-bottom: 2px solid #333; padding-bottom: 5px; }
         label { display: block; margin-top: 10px; font-weight: bold; color: #a0a0a0; }
         textarea, input[type="text"], input[type="number"] { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #555; border-radius: 4px; box-sizing: border-box; background-color: #1e1e1e; color: #f2f2f2; }
-        button { background-color: #e74c3c; color: white; padding: 12px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 18px; margin-bottom: 30px; }
-        button:hover { background-color: #c0392b; }
         
-        /* Styl pro výstupní dashboard - napodobuje Stravu */
+        /* Styl pro hlavní tlačítko */
+        #btnVytvor { background-color: #e74c3c; color: white; padding: 12px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 18px; margin-bottom: 30px; }
+        #btnVytvor:hover { background-color: #c0392b; }
+        
+        /* Styl pro tlačítko Kopírovat */
+        #btnKopiruj { background-color: #3498db; color: white; padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; margin-left: 10px; }
+        #btnKopiruj:hover { background-color: #2980b9; }
+
+        /* Styl pro výstupní dashboard */
         #vystupPromptu {
-            background-color: #1e1e1e; /* Tmavá karta */
-            border: 2px solid #444; /* Jemný rámeček */
+            background-color: #1e1e1e;
+            border: 2px solid #444;
             padding: 20px;
-            white-space: pre-wrap; /* Zachování formátování z Gemini */
-            margin-top: 20px;
+            white-space: pre-wrap;
+            margin-top: 10px;
             min-height: 250px;
             border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); /* Stín */
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
         }
-        .sekce { margin-bottom: 30px; padding: 15px; border: 1px solid #444; border-radius: 6px; background-color: #2c2c2c; } /* Sekce pro vstup */
+        .sekce { margin-bottom: 30px; padding: 15px; border: 1px solid #444; border-radius: 6px; background-color: #2c2c2c; }
     </style>
 
     <script>
-        // Váš Master Prompt pro trenéra
-        const MASTER_PROMPT_INSTRUKCE = `Ahoj Gemini. Nahoře máš kompletní vstupní data. Jsi **Osobní AI Trenér**.
+        // Váš Master Prompt pro trenéra (Zde ho ponecháme v celku)
+        const MASTER_PROMPT_INSTRUKCE = `Ahoj Gemini. Nahoře máš kompletní vstupní data rozdělená do čtyř sekcí.
+Jsi můj osobní, nehodnotící **Trenér a Výživový Specialista**.
 
 ### CÍL: Generování Dashboardu (POUZE TEXT A MARKDOWN) ###
 Vygeneruj výstup ve dvou sekcích. **Používej emojis a tučné písmo pro zvýraznění.**
@@ -88,7 +95,25 @@ ${MASTER_PROMPT_INSTRUKCE}
 `;
             // Zobrazení výsledného textu
             vystupElement.textContent = finalPrompt;
-            alert("Master Prompt je připraven! Zkopírujte text z pole níže a vložte jej do Gemini chatbota.");
+        }
+
+        async function zkopirujPrompt() {
+            const textKeKopirovani = document.getElementById('vystupPromptu').textContent;
+            
+            if (textKeKopirovani.trim() === 'Zde se objeví kompletní prompt, jakmile kliknete na tlačítko výše.') {
+                alert('Nejprve musíte kliknout na "Vytvořit Master Prompt".');
+                return;
+            }
+
+            try {
+                // Použití moderního API pro zápis do schránky
+                await navigator.clipboard.writeText(textKeKopirovani);
+                alert('Prompt byl úspěšně zkopírován do schránky!');
+            } catch (err) {
+                // Záložní metoda pro starší prohlížeče (není ideální)
+                console.error('Kopírování selhalo: ', err);
+                alert('Kopírování do schránky se nezdařilo. Zkuste prosím text označit a zkopírovat ručně.');
+            }
         }
     </script>
 
@@ -103,7 +128,7 @@ ${MASTER_PROMPT_INSTRUKCE}
     <div id="vstup" class="sekce">
         <h2>1. Základní Údaje a Data</h2>
         <label for="hmotnost">Hmotnost (kg):</label>
-        <input type="number" id="hmotnost" value="78" required>
+        <input type="number" id="hmotnost" value="85" required>
         <label for="vyska">Výška (cm):</label>
         <input type="number" id="vyska" value="180" required>
         <label for="vek">Věk:</label>
@@ -112,36 +137,25 @@ ${MASTER_PROMPT_INSTRUKCE}
         <input type="text" id="cil" value="Zlepšení vytrvalosti a udržení váhy" required>
 
         <label for="denniZaznamy">Subjektivní pocity, spánek, hydratace (ZÁZNAMY!):</label>
-        <textarea id="denniZaznamy" rows="6" placeholder="Příklad: DATUM: 2025-12-01, Kvalita spánku: 6h, Cítím se unavený...">DATUM: 2025-12-01
-Kvalita spánku: 6 hodin, cítil jsem se unavený
-Hydratace: 1 litr
-
-DATUM: 2025-12-02
-Kvalita spánku: 8 hodin, cítím se skvěle
-Hydratace: 2.5 litru</textarea>
+        <textarea id="denniZaznamy" rows="6" placeholder="Příklad: DATUM: 2025-12-01, Kvalita spánku: 6h, Cítím se unavený..."></textarea>
 
         <label for="jidelnicek">Jídelníček (PŘEHLED JÍDEL!):</label>
-        <textarea id="jidelnicek" rows="6" placeholder="Příklad: DATUM: 2025-12-01, SNÍDANĚ: míchaná vejce, VEČEŘE: 5 piv a kebab...">DATUM: 2025-12-01
-SNÍDANĚ: míchaná vejce
-OBĚD: těstoviny s tuňákem
-VEČEŘE: 5 piv, velký smažený sýr, hranolky
-
-DATUM: 2025-12-02
-SNÍDANĚ: ovesná kaše
-OBĚD: losos, brambory
-VEČEŘE: tvaroh s ovocem</textarea>
+        <textarea id="jidelnicek" rows="6" placeholder="Příklad: DATUM: 2025-12-01, SNÍDANĚ: míchaná vejce, VEČEŘE: 5 piv a kebab..."></textarea>
 
         <label for="stravaData">2. JSON Data ze Stravy (Vložte JSON výstup z Colabu!):</label>
-        <textarea id="stravaData" rows="10" placeholder='[{"Datum": "2025-12-01", "Nazev": "Lehký běh", "Vzdalenost_km": 5.0, ...}, {...}]'></textarea>
+        <textarea id="stravaData" rows="10" placeholder='[{"Datum": "2025-12-01", "Nazev": "Lehký běh", ...}, {...}]'></textarea>
 
-        <button onclick="vytvorPrompt()">Vytvořit Master Prompt pro Gemini</button>
+        <button id="btnVytvor" onclick="vytvorPrompt()">Vytvořit Master Prompt pro Gemini</button>
     </div>
 
     <hr>
 
     <div class="sekce">
         <h2>3. Zkopírujte a analyzujte</h2>
-        <p><strong>Krok A:</strong> Zkopírujte celý textový blok níže. <br><strong>Krok B:</strong> Vložte jej do [chatbota Gemini] a spusťte analýzu.</p>
+        <p><strong>Krok A:</strong> Klikněte na "Kopírovat do schránky". <br><strong>Krok B:</strong> Vložte (Ctrl+V) text do [chatbota Gemini] a spusťte analýzu.</p>
+        
+        <button id="btnKopiruj" onclick="zkopirujPrompt()">Kopírovat do schránky jedním klikem</button>
+
         <div id="vystupPromptu">Zde se objeví kompletní prompt, jakmile kliknete na tlačítko výše.</div>
     </div>
     
