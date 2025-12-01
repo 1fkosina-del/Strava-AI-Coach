@@ -4,14 +4,94 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Personalizovaný Běžecký Analyzátor</title>
-    <style>
-        /* ZÁKLADNÍ CSS PRO PŘEHLEDNOST */
-        body { font-family: sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; background-color: #f4f7f6; }
-        h1, h2 { color: #2c3e50; border-bottom: 2px solid #bdc3c7; padding-bottom: 5px; }
-        textarea, input[type="text"], input[type="number"] { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        button { background-color: #e74c3c; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-bottom: 20px; }
-        #vystupPromptu { background-color: #ecf0f1; border: 1px solid #bdc3c7; padding: 15px; white-space: pre-wrap; margin-top: 20px; }
+    
+<style>
+        body { font-family: sans-serif; max-width: 900px; margin: 0 auto; padding: 20px; background-color: #121212; color: #ecf0f1; } /* Tmavé pozadí */
+        h1, h2, h3 { color: #f2f2f2; border-bottom: 2px solid #333; padding-bottom: 5px; }
+        label { display: block; margin-top: 10px; font-weight: bold; color: #a0a0a0; }
+        textarea, input[type="text"], input[type="number"] { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #555; border-radius: 4px; box-sizing: border-box; background-color: #1e1e1e; color: #f2f2f2; }
+        button { background-color: #e74c3c; color: white; padding: 12px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 18px; margin-bottom: 30px; }
+        button:hover { background-color: #c0392b; }
+        
+        /* Styl pro výstupní dashboard - napodobuje Stravu */
+        #vystupPromptu {
+            background-color: #1e1e1e; /* Tmavá karta */
+            border: 2px solid #444; /* Jemný rámeček */
+            padding: 20px;
+            white-space: pre-wrap; /* Zachování formátování z Gemini */
+            margin-top: 20px;
+            min-height: 250px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); /* Stín */
+        }
+        .sekce { margin-bottom: 30px; padding: 15px; border: 1px solid #444; border-radius: 6px; background-color: #2c2c2c; } /* Sekce pro vstup */
     </style>
+
+    <script>
+        // Váš Master Prompt pro trenéra
+        const MASTER_PROMPT_INSTRUKCE = `Ahoj Gemini. Nahoře máš kompletní vstupní data. Jsi **Osobní AI Trenér**.
+
+### CÍL: Generování Dashboardu (POUZE TEXT A MARKDOWN) ###
+Vygeneruj výstup ve dvou sekcích. **Používej emojis a tučné písmo pro zvýraznění.**
+
+## 1. 📊 SOUHRN VÝKONU (Karty)
+Vygeneruj klíčové metriky, které se objeví jako na dashboardu, a to pro ty dny, kde proběhl trénink.
+
+**Formát karty:**
+* **📅 Datum:** [Datum]
+* **🏃 VZDÁLENOST:** [Vypočtená vzdálenost z JSON]
+* **⚡️ PRŮMĚRNÉ TEMPO:** [Vypočtené tempo]
+* **❤️ PRŮMĚRNÝ TEP:** [Vypočtený tep, pokud je dostupný]
+* **⚖️ BILANCE ENERGIE:** [Odhad Kalorie příjem mínus Kalorie výdej]
+
+## 2. 📝 DETAILNÍ ANALÝZA A DOPORUČENÍ
+* **🩺 Hodnocení Kondice:** Vypočti BMI (z mých Základních údajů). Propojením pocity/nemoc/spánek/hydratace vysvětli, proč byl daný běh snadný/těžký.
+* **🍺 Vliv Jídelníčku:** Zanalyzuj vliv konzumace alkoholu a nezdravého jídla (pokud je uvedeno) na regeneraci. Dej mi limitní doporučení, kolik piv týdně je ještě "OK" a navrhni náhradu.
+* **💪 Tréninkové Doporučení:** Posuď, zda je objem tréninku dostatečný pro cíl *Zlepšení vytrvalosti* a navrhni jedno konkrétní opatření pro zítřek (např. *Zvýšit sacharidy, 30 min procházka, Jít dříve spát*).
+
+Odpověz stručně, v bodech a profesionálně.`;
+
+
+        function vytvorPrompt() {
+            // Získání dat z formuláře
+            const hmotnost = document.getElementById('hmotnost').value;
+            const vyska = document.getElementById('vyska').value;
+            const vek = document.getElementById('vek').value;
+            const cil = document.getElementById('cil').value;
+            const denniZaznamy = document.getElementById('denniZaznamy').value;
+            const jidelnicek = document.getElementById('jidelnicek').value;
+            const stravaData = document.getElementById('stravaData').value;
+            const vystupElement = document.getElementById('vystupPromptu');
+
+            // Složení celého Master Promptu
+            const finalPrompt = `
+### ZÁKLADNÍ ÚDAJE ###
+Pohlaví: Muž
+Věk: ${vek} let
+Výška: ${vyska} cm
+Hmotnost: ${hmotnost} kg
+Cíl: ${cil}
+
+### DENNÍ ZÁZNAMY (Subjektivní) ###
+${denniZaznamy}
+
+### JÍDELNÍČEK ###
+${jidelnicek}
+
+### STRAVA AKTIVITY (JSON) ###
+${stravaData}
+
+----------------------------------------------------
+
+## ANALYTICKÝ PROMPT PRO GEMINI:
+${MASTER_PROMPT_INSTRUKCE}
+`;
+            // Zobrazení výsledného textu
+            vystupElement.textContent = finalPrompt;
+            alert("Master Prompt je připraven! Zkopírujte text z pole níže a vložte jej do Gemini chatbota.");
+        }
+    </script>
+
 </head>
 <body>
 
@@ -20,29 +100,28 @@
 
     <hr>
 
-    <div id="vstup">
-        <h2>1. Základní Údaje a Jídelníček</h2>
+    <div id="vstup" class="sekce">
+        <h2>1. Základní Údaje a Data</h2>
         <label for="hmotnost">Hmotnost (kg):</label>
-        <input type="number" id="hmotnost" value="78">
+        <input type="number" id="hmotnost" value="78" required>
         <label for="vyska">Výška (cm):</label>
-        <input type="number" id="vyska" value="180">
+        <input type="number" id="vyska" value="180" required>
         <label for="vek">Věk:</label>
-        <input type="number" id="vek" value="35">
+        <input type="number" id="vek" value="35" required>
         <label for="cil">Tréninkový Cíl:</label>
-        <input type="text" id="cil" value="Zlepšení vytrvalosti a udržení váhy">
+        <input type="text" id="cil" value="Zlepšení vytrvalosti a udržení váhy" required>
 
-        <label for="denniZaznamy">Subjektivní pocity, spánek, hydratace (např. DATUM: 2025-12-01, Kvalita spánku: 6h, Cítím se unavený...):</label>
-        <textarea id="denniZaznamy" rows="6">DATUM: 2025-12-01
+        <label for="denniZaznamy">Subjektivní pocity, spánek, hydratace (ZÁZNAMY!):</label>
+        <textarea id="denniZaznamy" rows="6" placeholder="Příklad: DATUM: 2025-12-01, Kvalita spánku: 6h, Cítím se unavený...">DATUM: 2025-12-01
 Kvalita spánku: 6 hodin, cítil jsem se unavený
 Hydratace: 1 litr
 
 DATUM: 2025-12-02
 Kvalita spánku: 8 hodin, cítím se skvěle
-Hydratace: 2.5 litru
-</textarea>
+Hydratace: 2.5 litru</textarea>
 
-        <label for="jidelnicek">Jídelníček (např. DATUM: 2025-12-01, SNÍDANĚ: rohlík, jogurt, VEČEŘE: 5 piv a kebab...):</label>
-        <textarea id="jidelnicek" rows="6">DATUM: 2025-12-01
+        <label for="jidelnicek">Jídelníček (PŘEHLED JÍDEL!):</label>
+        <textarea id="jidelnicek" rows="6" placeholder="Příklad: DATUM: 2025-12-01, SNÍDANĚ: míchaná vejce, VEČEŘE: 5 piv a kebab...">DATUM: 2025-12-01
 SNÍDANĚ: míchaná vejce
 OBĚD: těstoviny s tuňákem
 VEČEŘE: 5 piv, velký smažený sýr, hranolky
@@ -50,10 +129,9 @@ VEČEŘE: 5 piv, velký smažený sýr, hranolky
 DATUM: 2025-12-02
 SNÍDANĚ: ovesná kaše
 OBĚD: losos, brambory
-VEČEŘE: tvaroh s ovocem
-</textarea>
+VEČEŘE: tvaroh s ovocem</textarea>
 
-        <label for="stravaData">2. JSON Data ze Stravy (Zkopírujte výstup z Colabu!):</label>
+        <label for="stravaData">2. JSON Data ze Stravy (Vložte JSON výstup z Colabu!):</label>
         <textarea id="stravaData" rows="10" placeholder='[{"Datum": "2025-12-01", "Nazev": "Lehký běh", "Vzdalenost_km": 5.0, ...}, {...}]'></textarea>
 
         <button onclick="vytvorPrompt()">Vytvořit Master Prompt pro Gemini</button>
@@ -61,25 +139,11 @@ VEČEŘE: tvaroh s ovocem
 
     <hr>
 
-    <h2>3. Zkopírujte Master Prompt do Gemini</h2>
-    <p>Zkopírujte celý textový blok níže a vložte jej do [chatbota Gemini]</p>
-    <div id="vystupPromptu">Zde se objeví kompletní prompt...</div>
-
-    <script>
-        // Váš Master Prompt pro trenéra
-        const MASTER_PROMPT_INSTRUKCE = `Ahoj Gemini. Nahoře máš kompletní vstupní data rozdělená do čtyř sekcí.
-Jsi můj osobní, nehodnotící **Trenér a Výživový Specialista**.
-
-### CÍL ANALÝZY A VÝSTUPNÍ FORMÁT ###
-Tvým hlavním cílem je **propojit Subjektivní pocity, Jídelníček a Výkon** (Strava data) a vypočítat **celkovou tělesnou kondici**.
-Odpověz ve dvou částech: Tabulka Makroživin a Výkonu, a Textové Hodnocení s Doporučeními.
-
-### 1. INTEGROVANÉ VÝPOČTY A PROPOJENÍ ###
-* **Základní Metriky:** Vypočti BMI a odhadni BMR (Bazální Metabolismus).
-* **Energetická Bilance:** Pro každý den odhadni příjem Kalorií (Jídelníček) a porovnej s výdejem (Strava). Jaká je bilance?
-* **Kvalita Regenerace:** Spáruj údaje o spánku a hydrataci s konzumací alkoholu z Jídelníčku.
-
-### 2. KONDIČNÍ HODNOCENÍ A DOPORUČENÍ ###
-* **Pivní Limit:** Na základě mých údajů posuď, jaký je můj optimální limit konzumace piva týdně pro minimální narušení regenerace. Upozorni na dopad 5 piv.
-* **Sacharidy a Vytrvalost:** Vyhodnoť, zda je příjem Sacharidů dostatečný pro můj Cíl (Vytrvalost).
-* **Analýza
+    <div class="sekce">
+        <h2>3. Zkopírujte a analyzujte</h2>
+        <p><strong>Krok A:</strong> Zkopírujte celý textový blok níže. <br><strong>Krok B:</strong> Vložte jej do [chatbota Gemini] a spusťte analýzu.</p>
+        <div id="vystupPromptu">Zde se objeví kompletní prompt, jakmile kliknete na tlačítko výše.</div>
+    </div>
+    
+</body>
+</html>
