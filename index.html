@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personalizovaný Běžecký Analyzátor</title>
+    <style>
+        /* ZÁKLADNÍ CSS PRO PŘEHLEDNOST */
+        body { font-family: sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; background-color: #f4f7f6; }
+        h1, h2 { color: #2c3e50; border-bottom: 2px solid #bdc3c7; padding-bottom: 5px; }
+        textarea, input[type="text"], input[type="number"] { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        button { background-color: #e74c3c; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-bottom: 20px; }
+        #vystupPromptu { background-color: #ecf0f1; border: 1px solid #bdc3c7; padding: 15px; white-space: pre-wrap; margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+    <h1>🏃 Běžecký AI Analyzátor (Verze Zdarma)</h1>
+    <p>Vyplňte data do formulářů, klikněte na "Vytvořit prompt" a zkopírujte celý text do Gemini chatbota k analýze.</p>
+
+    <hr>
+
+    <div id="vstup">
+        <h2>1. Základní Údaje a Jídelníček</h2>
+        <label for="hmotnost">Hmotnost (kg):</label>
+        <input type="number" id="hmotnost" value="78">
+        <label for="vyska">Výška (cm):</label>
+        <input type="number" id="vyska" value="180">
+        <label for="vek">Věk:</label>
+        <input type="number" id="vek" value="35">
+        <label for="cil">Tréninkový Cíl:</label>
+        <input type="text" id="cil" value="Zlepšení vytrvalosti a udržení váhy">
+
+        <label for="denniZaznamy">Subjektivní pocity, spánek, hydratace (např. DATUM: 2025-12-01, Kvalita spánku: 6h, Cítím se unavený...):</label>
+        <textarea id="denniZaznamy" rows="6">DATUM: 2025-12-01
+Kvalita spánku: 6 hodin, cítil jsem se unavený
+Hydratace: 1 litr
+
+DATUM: 2025-12-02
+Kvalita spánku: 8 hodin, cítím se skvěle
+Hydratace: 2.5 litru
+</textarea>
+
+        <label for="jidelnicek">Jídelníček (např. DATUM: 2025-12-01, SNÍDANĚ: rohlík, jogurt, VEČEŘE: 5 piv a kebab...):</label>
+        <textarea id="jidelnicek" rows="6">DATUM: 2025-12-01
+SNÍDANĚ: míchaná vejce
+OBĚD: těstoviny s tuňákem
+VEČEŘE: 5 piv, velký smažený sýr, hranolky
+
+DATUM: 2025-12-02
+SNÍDANĚ: ovesná kaše
+OBĚD: losos, brambory
+VEČEŘE: tvaroh s ovocem
+</textarea>
+
+        <label for="stravaData">2. JSON Data ze Stravy (Zkopírujte výstup z Colabu!):</label>
+        <textarea id="stravaData" rows="10" placeholder='[{"Datum": "2025-12-01", "Nazev": "Lehký běh", "Vzdalenost_km": 5.0, ...}, {...}]'></textarea>
+
+        <button onclick="vytvorPrompt()">Vytvořit Master Prompt pro Gemini</button>
+    </div>
+
+    <hr>
+
+    <h2>3. Zkopírujte Master Prompt do Gemini</h2>
+    <p>Zkopírujte celý textový blok níže a vložte jej do [chatbota Gemini]</p>
+    <div id="vystupPromptu">Zde se objeví kompletní prompt...</div>
+
+    <script>
+        // Váš Master Prompt pro trenéra
+        const MASTER_PROMPT_INSTRUKCE = `Ahoj Gemini. Nahoře máš kompletní vstupní data rozdělená do čtyř sekcí.
+Jsi můj osobní, nehodnotící **Trenér a Výživový Specialista**.
+
+### CÍL ANALÝZY A VÝSTUPNÍ FORMÁT ###
+Tvým hlavním cílem je **propojit Subjektivní pocity, Jídelníček a Výkon** (Strava data) a vypočítat **celkovou tělesnou kondici**.
+Odpověz ve dvou částech: Tabulka Makroživin a Výkonu, a Textové Hodnocení s Doporučeními.
+
+### 1. INTEGROVANÉ VÝPOČTY A PROPOJENÍ ###
+* **Základní Metriky:** Vypočti BMI a odhadni BMR (Bazální Metabolismus).
+* **Energetická Bilance:** Pro každý den odhadni příjem Kalorií (Jídelníček) a porovnej s výdejem (Strava). Jaká je bilance?
+* **Kvalita Regenerace:** Spáruj údaje o spánku a hydrataci s konzumací alkoholu z Jídelníčku.
+
+### 2. KONDIČNÍ HODNOCENÍ A DOPORUČENÍ ###
+* **Pivní Limit:** Na základě mých údajů posuď, jaký je můj optimální limit konzumace piva týdně pro minimální narušení regenerace. Upozorni na dopad 5 piv.
+* **Sacharidy a Vytrvalost:** Vyhodnoť, zda je příjem Sacharidů dostatečný pro můj Cíl (Vytrvalost).
+* **Analýza
